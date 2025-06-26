@@ -1,0 +1,173 @@
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>圖片下載功能</title>
+  <style>
+    body {
+      font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .download-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .download-card {
+      border: 1px solid #eaeaea;
+      border-radius: 8px;
+      padding: 16px;
+      width: 300px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .image-preview {
+      margin-bottom: 16px;
+    }
+
+    .image-preview img {
+      width: 100%;
+      border-radius: 4px;
+    }
+
+    .download-button {
+      background-color: #ff7300;
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+      padding: 8px 16px;
+      border-radius: 4px;
+      text-decoration: none;
+      display: inline-block;
+      cursor: pointer;
+      border: none;
+      transition: background-color 0.2s;
+    }
+
+    .download-button:hover {
+      background-color: #ffbc00;
+    }
+
+    .card-title {
+      font-size: 18px;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+  <h1>劇照下載</h1>
+
+  <div class="download-container">
+    <div class="download-card">
+      <h2 class="card-title">鬼滅之刃無限城編</h2>
+      <div class="image-preview">
+        <img src="鬼滅之刃無限城編.png" alt="鬼滅之刃無限城編劇照" id="demonSlayerImage">
+      </div>
+      <button class="download-button" data-image="鬼滅之刃無限城編.png" data-filename="鬼滅之刃無限城編.png">
+        下載鬼滅劇照
+      </button>
+    </div>
+
+    <div class="download-card">
+      <h2 class="card-title">《鬼滅之刃》劇場版「無限城篇」</h2>
+      <div class="image-preview">
+        <img src="鬼滅之刃》劇場版「無限城篇」.jpg" alt="實況掛台圖片" id="streamBannerImage">
+      </div>
+      <button class="download-button" data-image="鬼滅之刃》劇場版「無限城篇」.jpg" data-filename="鬼滅之刃》劇場版「無限城篇」.jpg">
+        下載劇場版「無限城篇」劇照
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // ES6 版本的圖片下載功能
+    document.addEventListener('DOMContentLoaded', () => {
+      // 獲取所有下載按鈕
+      const downloadButtons = document.querySelectorAll('.download-button');
+
+      // 為每個按鈕添加點擊事件
+      downloadButtons.forEach(button => {
+        button.addEventListener('click', handleDownload);
+      });
+
+      /**
+       * 處理下載圖片的函數
+       * @param {Event} event - 點擊事件
+       */
+      function handleDownload(event) {
+        // 獲取按鈕上的數據屬性
+        const imageSrc = event.currentTarget.dataset.image;
+        const fileName = event.currentTarget.dataset.filename;
+
+        // 調用下載函數
+        downloadImage(imageSrc, fileName);
+      }
+
+      /**
+       * 下載圖片的核心函數
+       * @param {string} imageSrc - 圖片來源路徑
+       * @param {string} fileName - 下載後的檔名
+       */
+      const downloadImage = (imageSrc, fileName) => {
+        // 建立一個新的 XMLHttpRequest
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', imageSrc, true);
+        xhr.responseType = 'blob';
+
+        // 顯示下載中狀態
+        const button = document.querySelector(`[data-image="${imageSrc}"]`);
+        const originalText = button.textContent;
+        button.textContent = '下載中...';
+        button.disabled = true;
+
+        xhr.onload = () => {
+          // 恢復按鈕狀態
+          button.textContent = originalText;
+          button.disabled = false;
+
+          if (xhr.status === 200) {
+            // 建立一個 Blob 物件
+            const blob = xhr.response;
+
+            // 建立一個臨時連結
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = fileName;
+
+            // 模擬點擊事件下載圖片
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // 釋放 URL 物件
+            setTimeout(() => {
+              URL.revokeObjectURL(link.href);
+            }, 100);
+          } else {
+            console.error('下載圖片失敗:', xhr.statusText);
+            alert('下載圖片失敗，請稍後再試。');
+          }
+        };
+
+        xhr.onerror = () => {
+          console.error('下載圖片出錯');
+          alert('下載圖片發生錯誤，請稍後再試。');
+
+          // 恢復按鈕狀態
+          button.textContent = originalText;
+          button.disabled = false;
+        };
+
+        xhr.send();
+      };
+    });
+  </script>
+</body>
+</html>
